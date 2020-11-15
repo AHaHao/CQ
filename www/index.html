@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>英雄列表</title>
+  <!-- 导入jquery -->
+  <script src="./libs/jquery-1.12.4.min.js"></script>
+  <!-- 导入bootstrap -->
+  <link rel="stylesheet" href="./libs/bootstrap/css/bootstrap.min.css">
+  <script src="./libs/bootstrap/js/bootstrap.min.js"></script>
+  <!-- 导入art-template -->
+  <script src="./libs/template-web.js"></script>
+</head>
+
+<body>
+  <!-- bootstrap的容器  带版心的-->
+  <div class="container">
+    <!-- 导航 -->
+    <nav class="navbar navbar-default">
+      <div class=".container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">欢迎进入CQ后台管理</a>
+        </div>
+        <!-- 用户登录信息 -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#" id="username">张三</a></li>
+            <li id="logoutBtn"><button class="btn btn-danger btn-exit" id="logout"
+                onclick="location.href='./logout'">退出</button></li>
+            <!-- onclick="location.href='./logout'" 点击发送请求 -->
+            <li id="loginBtn"><button class="btn btn-success" id="login"
+                onclick="location.href='./login.html'">请登录</button></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- 底部的内容 -->
+    <div class="row">
+      <!-- 栅格布局 -->
+      <div class=".col-md-9">
+        <div class="panel panel-default">
+          <!-- 标题 -->
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <!-- 面包屑导航 -->
+              <ol class="breadcrumb">
+                <li><a href="#">首页</a></li>
+                <li class="active">英雄列表</li>
+              </ol>
+            </h3>
+          </div>
+          <!-- 标题 -->
+          <div class="panel-heading">
+            <!-- 表单 -->
+            <form class="form-inline" onsubmit="return false">
+              <div class="form-group">
+                <label class="sr-only" for="search">Amount (in dollars)</label>
+                <div class="input-group">
+                  <div class="input-group-addon">英雄姓名</div>
+                  <input type="text" class="form-control" id="search" placeholder="请输入查询内容" />
+                </div>
+              </div>
+              <button type="button" class="btn btn-success btn-search" id="searchBtn">查找</button>
+              <button type="button" class="btn btn-warning" onclick="location.href='./insert.html'">新增</button>
+            </form>
+          </div>
+          <!-- 内容 -->
+          <div class="panel-body" id="content">
+            <table class="table table-bordered">
+              <!-- 头部 -->
+              <thead>
+                <tr>
+                  <th>姓名</th>
+                  <th>技能</th>
+                  <th>头像</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <!-- 表格body -->
+              <tbody id="heroListBody">
+                <td> 提姆 </td>
+                <td> <img src="./images/111.png" width="100px" height="100px"> </td>
+                <td><img src="./images/111.png" width="72px" height="72px"></td>
+                <td class="manager">
+                  <button class="btn btn-success" onclick="location.href='./update.html'">编辑🐷</button>
+                  <button class="btn btn-danger">删除👍</button>
+                </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script id="heroLists" type="text/html">
+    {{each data v}}
+    <tr>
+         <td>{{v.name}}</td>
+         <td> <img src="{{v.skill}}" width="100px" height="100px"> </td>
+         <td><img src="{{v.icon}}" width="72px" height="72px"></td>
+         <td class="manager">
+           <button class="btn btn-success btn-edit" onclick="location.href='./update.html?id={{v.id}}'" data-id="{{v.id}}">编辑🐷</button>
+           <button class="btn btn-danger btn-delete" data-id="{{v.id}}">删除👍</button>
+         </td>
+     </tr>
+    {{/each}}
+  </script>
+
+  <script>
+    $(function () {
+      $('.btn-search').on('click', function (e) {
+        e = window.event || e;
+        let searchVal = $('#search').val().trim();
+        // console.log(searchVal);
+        $.ajax({
+          type: 'get',
+          url: 'http://127.0.0.1:3000/hero/list',
+          data: {
+            search: searchVal
+          },
+          success: function (backData) {
+            console.log(backData);
+            if (backData.code == 200) {
+              let ret = template('heroLists', backData);
+              // console.log(ret);
+              $('#heroListBody').html(ret);
+              if (backData.user) {
+                $('#username').text(backData.user.username);
+                $('#logoutBtn').show();
+                $('#loginBtn').hide()
+                $('.btn-edit').show();
+                $('.btn-delete').show();
+              } else {
+                $('#username').text('');
+                $('#loginBtn').show();
+                $('#logoutBtn').hide();
+                $('.btn-edit').hide();
+                $('.btn-delete').hide();
+              }
+
+            }
+          }
+
+
+        })
+      })
+
+      // 进入页面加载英雄
+      $('.btn-search').click();
+
+      //键盘按下事件
+      $('#search').on('keydown', function (e) {
+        e = window.event || e;
+        // e.preventDefault();
+        // console.log("search" + e.keyCode);
+        if (e.keyCode == 13) {
+          // console.log(333);
+          $('.btn-search').trigger('click');
+        }
+      })
+
+
+
+
+      // 删除英雄
+      $('#heroListBody').on('click', '.btn-delete', function (e) {
+        e.preventDefault();
+        let id = $(this).attr('data-id');
+        // console.log(id);
+        if (confirm('确认要删除？')) {
+          $.ajax({
+            type: 'post',
+            url: 'http://127.0.0.1:3000/hero/delete',
+            data: {
+              id: id
+            },
+            success: function (backData) {
+              //  console.log(backData);
+              alert(backData.msg);
+              if (backData.code == 200) {
+                $(this).parent().parent().html('');
+                $('.btn-search').click();
+              }
+            }
+          })
+
+        }
+
+      });
+
+      // 退出
+      // $('#logout').on('click', function () {
+      //   $.ajax({
+      //     url: 'http://127.0.0.1:3000/logout',
+      //     success: function (backData) {
+      //       console.log(backData);
+      //     }
+      //   })
+
+      // })
+
+    })
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "WZHero",
+  "version": "1.0.0",
+  "description": "",
+  "main": "getHero.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-session": "^1.4.0",
+    "cookies": "^0.8.0",
+    "cors": "^2.8.5",
+    "crawler": "^1.2.2",
+    "express": "^4.17.1",
+    "express-fileupload": "^1.2.0",
+    "fileupload": "^1.0.0",
+    "mysql-ithm": "^2.2.4",
+    "svg-captcha": "^1.4.0"
+  }
+}
